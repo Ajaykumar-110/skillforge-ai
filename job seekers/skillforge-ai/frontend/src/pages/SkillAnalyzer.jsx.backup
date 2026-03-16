@@ -1,0 +1,1160 @@
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import {
+  Brain,
+  TrendingUp,
+  Award,
+  Target,
+  BarChart3,
+  Plus,
+  X,
+  Download,
+  Upload,
+  Zap,
+  BookOpen,
+  Briefcase,
+  Star,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Edit,
+  Trash2,
+  Save,
+  RefreshCw,
+  Filter,
+  Search,
+  ChevronRight,
+  Lightbulb,
+  Rocket,
+  Shield,
+  Code,
+  Database,
+  Cloud,
+  Smartphone,
+  Cpu
+} from 'lucide-react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area
+} from 'recharts'
+import apiService from '../services/api'
+
+const SkillAnalyzer = () => {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const [skills, setSkills] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [newSkill, setNewSkill] = useState({ name: '', level: 50, category: 'Frontend', experience: '', projects: 0, lastUsed: '' })
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [editingSkill, setEditingSkill] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [sortBy, setSortBy] = useState('name')
+  const [viewMode, setViewMode] = useState('grid')
+  const [showRecommendations, setShowRecommendations] = useState(false)
+  const [skillGapAnalysis, setSkillGapAnalysis] = useState(null)
+  const [learningPaths, setLearningPaths] = useState([])
+  const [skillTrends, setSkillTrends] = useState([])
+  
+  const [skillCategories] = useState([
+    'Frontend', 'Backend', 'Database', 'DevOps', 'Mobile', 
+    'AI/ML', 'Cloud', 'Security', 'Testing', 'UI/UX', 'Blockchain', 'IoT'
+  ])
+  
+  const [categoryIcons] = useState({
+    'Frontend': Code,
+    'Backend': Database,
+    'Database': Database,
+    'DevOps': Cloud,
+    'Mobile': Smartphone,
+    'AI/ML': Cpu,
+    'Cloud': Cloud,
+    'Security': Shield,
+    'Testing': CheckCircle,
+    'UI/UX': Lightbulb,
+    'Blockchain': Zap,
+    'IoT': Smartphone
+  })
+
+  // Load skills from API on component mount
+  useEffect(() => {
+    loadSkills()
+    generateSkillTrends()
+    generateLearningPaths()
+    analyzeSkillGaps()
+  }, [])
+
+  const loadSkills = async () => {
+    try {
+      setLoading(true)
+      
+      // Enhanced mock data with comprehensive skill information
+      const enhancedMockSkills = [
+        { 
+          id: 1, 
+          name: 'JavaScript', 
+          level: 85, 
+          category: 'Frontend',
+          experience: '3 years',
+          projects: 12,
+          lastUsed: '2 days ago',
+          certifications: ['JavaScript Algorithms'],
+          learningResources: ['MDN Docs', 'JavaScript.info'],
+          marketDemand: 95,
+          growthPotential: 88
+        },
+        { 
+          id: 2, 
+          name: 'React', 
+          level: 80, 
+          category: 'Frontend',
+          experience: '2.5 years',
+          projects: 8,
+          lastUsed: '1 day ago',
+          certifications: ['React Developer'],
+          learningResources: ['React Docs', 'Epic React'],
+          marketDemand: 92,
+          growthPotential: 85
+        },
+        { 
+          id: 3, 
+          name: 'Python', 
+          level: 75, 
+          category: 'Backend',
+          experience: '2 years',
+          projects: 6,
+          lastUsed: '3 days ago',
+          certifications: ['Python Developer'],
+          learningResources: ['Python.org', 'Real Python'],
+          marketDemand: 88,
+          growthPotential: 90
+        },
+        { 
+          id: 4, 
+          name: 'Node.js', 
+          level: 70, 
+          category: 'Backend',
+          experience: '1.5 years',
+          projects: 5,
+          lastUsed: '1 week ago',
+          certifications: [],
+          learningResources: ['Node.js Docs'],
+          marketDemand: 85,
+          growthPotential: 82
+        },
+        { 
+          id: 5, 
+          name: 'SQL', 
+          level: 65, 
+          category: 'Database',
+          experience: '2 years',
+          projects: 4,
+          lastUsed: '4 days ago',
+          certifications: ['SQL Fundamentals'],
+          learningResources: ['SQLBolt', 'Mode Analytics'],
+          marketDemand: 78,
+          growthPotential: 75
+        },
+        { 
+          id: 6, 
+          name: 'Docker', 
+          level: 60, 
+          category: 'DevOps',
+          experience: '1 year',
+          projects: 3,
+          lastUsed: '2 weeks ago',
+          certifications: [],
+          learningResources: ['Docker Docs'],
+          marketDemand: 82,
+          growthPotential: 88
+        },
+        { 
+          id: 7, 
+          name: 'React Native', 
+          level: 55, 
+          category: 'Mobile',
+          experience: '6 months',
+          projects: 2,
+          lastUsed: '1 month ago',
+          certifications: [],
+          learningResources: ['React Native Docs'],
+          marketDemand: 75,
+          growthPotential: 80
+        },
+        { 
+          id: 8, 
+          name: 'TensorFlow', 
+          level: 45, 
+          category: 'AI/ML',
+          experience: '3 months',
+          projects: 1,
+          lastUsed: '2 months ago',
+          certifications: [],
+          learningResources: ['TensorFlow Docs'],
+          marketDemand: 85,
+          growthPotential: 92
+        },
+        { 
+          id: 9, 
+          name: 'AWS', 
+          level: 50, 
+          category: 'Cloud',
+          experience: '8 months',
+          projects: 2,
+          lastUsed: '3 weeks ago',
+          certifications: ['AWS Cloud Practitioner'],
+          learningResources: ['AWS Docs'],
+          marketDemand: 90,
+          growthPotential: 85
+        },
+        { 
+          id: 10, 
+          name: 'MongoDB', 
+          level: 58, 
+          category: 'Database',
+          experience: '1 year',
+          projects: 3,
+          lastUsed: '1 week ago',
+          certifications: [],
+          learningResources: ['MongoDB University'],
+          marketDemand: 72,
+          growthPotential: 78
+        }
+      ]
+      
+      setSkills(enhancedMockSkills)
+    } catch (error) {
+      console.error('Failed to load skills:', error)
+      setSkills([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const generateSkillTrends = () => {
+    const trends = [
+      { month: 'Jan', frontend: 75, backend: 70, database: 65, devops: 55 },
+      { month: 'Feb', frontend: 78, backend: 72, database: 67, devops: 58 },
+      { month: 'Mar', frontend: 80, backend: 74, database: 68, devops: 60 },
+      { month: 'Apr', frontend: 82, backend: 75, database: 70, devops: 62 },
+      { month: 'May', frontend: 85, backend: 77, database: 72, devops: 65 },
+      { month: 'Jun', frontend: 88, backend: 80, database: 74, devops: 68 }
+    ]
+    setSkillTrends(trends)
+  }
+
+  const generateLearningPaths = () => {
+    const paths = [
+      {
+        title: 'Frontend Mastery',
+        description: 'Become a frontend expert',
+        skills: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML'],
+        duration: '6 months',
+        difficulty: 'Advanced',
+        icon: Code
+      },
+      {
+        title: 'Full Stack Developer',
+        description: 'Master both frontend and backend',
+        skills: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Express'],
+        duration: '12 months',
+        difficulty: 'Intermediate',
+        icon: Rocket
+      },
+      {
+        title: 'Cloud Architecture',
+        description: 'Design and deploy cloud solutions',
+        skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform'],
+        duration: '8 months',
+        difficulty: 'Advanced',
+        icon: Cloud
+      }
+    ]
+    setLearningPaths(paths)
+  }
+
+  const analyzeSkillGaps = () => {
+    const analysis = {
+      overallScore: 72,
+      strengths: ['JavaScript', 'React', 'Frontend Development'],
+      improvements: ['DevOps', 'Cloud Computing', 'Database Optimization'],
+      recommendations: [
+        'Focus on Docker and Kubernetes for DevOps skills',
+        'Learn AWS cloud services for better marketability',
+        'Practice advanced SQL and NoSQL databases'
+      ],
+      careerReadiness: 'Intermediate',
+      nextLevel: 'Senior Developer'
+    }
+    setSkillGapAnalysis(analysis)
+  }
+
+  // Enhanced handler functions
+  const addSkill = async () => {
+    if (newSkill.name.trim()) {
+      try {
+        const skillToAdd = {
+          ...newSkill,
+          id: Date.now(),
+          projects: newSkill.projects || 0,
+          experience: newSkill.experience || '',
+          lastUsed: 'Just now',
+          certifications: [],
+          learningResources: [],
+          marketDemand: Math.floor(Math.random() * 30) + 70,
+          growthPotential: Math.floor(Math.random() * 25) + 75
+        }
+        
+        setSkills([...skills, skillToAdd])
+        setNewSkill({ name: '', level: 50, category: 'Frontend', experience: '', projects: 0, lastUsed: '' })
+        setShowAddForm(false)
+        
+        // Re-analyze skill gaps after adding
+        analyzeSkillGaps()
+      } catch (error) {
+        console.error('Failed to add skill:', error)
+      }
+    }
+  }
+
+  const updateSkill = async (skillId, updatedData) => {
+    try {
+      setSkills(skills.map(skill => 
+        skill.id === skillId ? { ...skill, ...updatedData } : skill
+      ))
+      setEditingSkill(null)
+      
+      // Re-analyze after updating
+      analyzeSkillGaps()
+    } catch (error) {
+      console.error('Failed to update skill:', error)
+    }
+  }
+
+  const removeSkill = async (skillId) => {
+    try {
+      setSkills(skills.filter(skill => skill.id !== skillId))
+      
+      // Re-analyze after removing
+      analyzeSkillGaps()
+    } catch (error) {
+      console.error('Failed to remove skill:', error)
+    }
+  }
+
+  const exportSkills = () => {
+    const exportData = {
+      user: user?.name || 'User',
+      exportDate: new Date().toLocaleString(),
+      totalSkills: skills.length,
+      averageLevel: Math.round(skills.reduce((acc, skill) => acc + skill.level, 0) / skills.length),
+      skillGapAnalysis,
+      skills: skills.map(skill => ({
+        name: skill.name,
+        level: skill.level,
+        category: skill.category,
+        experience: skill.experience,
+        projects: skill.projects,
+        marketDemand: skill.marketDemand,
+        growthPotential: skill.growthPotential
+      }))
+    }
+    
+    const dataStr = JSON.stringify(exportData, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `skills-report-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const importSkills = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result)
+          if (importedData.skills && Array.isArray(importedData.skills)) {
+            setSkills([...skills, ...importedData.skills.map(skill => ({ ...skill, id: Date.now() + Math.random() }))])
+            analyzeSkillGaps()
+          }
+        } catch (error) {
+          console.error('Failed to import skills:', error)
+          alert('Failed to import skills. Please check the file format.')
+        }
+      }
+      reader.readAsText(file)
+    }
+  }
+
+  const filteredAndSortedSkills = skills
+    .filter(skill => {
+      const matchesSearch = skill.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesCategory = selectedCategory === 'All' || skill.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'level':
+          return b.level - a.level
+        case 'category':
+          return a.category.localeCompare(b.category)
+        case 'demand':
+          return b.marketDemand - a.marketDemand
+        default:
+          return 0
+      }
+    })
+
+  const getSkillLevelColor = (level) => {
+    if (level >= 80) return 'text-green-600 bg-green-50 border-green-200'
+    if (level >= 60) return 'text-blue-600 bg-blue-50 border-blue-200'
+    if (level >= 40) return 'text-yellow-600 bg-yellow-50 border-yellow-200'
+    return 'text-red-600 bg-red-50 border-red-200'
+  }
+
+  const getSkillLevelText = (level) => {
+    if (level >= 80) return 'Expert'
+    if (level >= 60) return 'Advanced'
+    if (level >= 40) return 'Intermediate'
+    return 'Beginner'
+  }
+
+  const getDemandColor = (demand) => {
+    if (demand >= 85) return 'text-green-600'
+    if (demand >= 70) return 'text-blue-600'
+    if (demand >= 50) return 'text-yellow-600'
+    return 'text-red-600'
+  }
+
+  const radarData = skills.map(skill => ({
+    skill: skill.name,
+    level: skill.level,
+    fullMark: 100
+  }))
+
+  const categoryData = skillCategories.map(category => ({
+    category,
+    average: skills
+      .filter(skill => skill.category === category)
+      .reduce((acc, skill) => acc + skill.level, 0) / 
+      Math.max(skills.filter(skill => skill.category === category).length, 1)
+  }))
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Analyzing your skills...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Skill Analyzer</h1>
+          <p className="text-gray-600 mt-1">Comprehensive skill analysis and career development insights</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowRecommendations(!showRecommendations)}
+            className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+          >
+            <Lightbulb className="w-4 h-4 text-yellow-600" />
+            <span className="text-sm text-gray-700">Recommendations</span>
+          </button>
+          <label className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 cursor-pointer">
+            <Upload className="w-4 h-4 text-gray-600" />
+            <span className="text-sm text-gray-700">Import</span>
+            <input type="file" accept=".json" onChange={importSkills} className="hidden" />
+          </label>
+          <button
+            onClick={exportSkills}
+            className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+          >
+            <Download className="w-4 h-4 text-gray-600" />
+            <span className="text-sm text-gray-700">Export</span>
+          </button>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Skill</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Skill Gap Analysis */}
+      {skillGapAnalysis && (
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <Brain className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Skill Gap Analysis</h3>
+                <p className="text-indigo-100 text-sm">Career Readiness: {skillGapAnalysis.careerReadiness}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold">{skillGapAnalysis.overallScore}%</div>
+              <div className="text-indigo-100 text-sm">Overall Score</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <h4 className="font-medium text-indigo-100 mb-2">Strengths</h4>
+              <div className="space-y-1">
+                {skillGapAnalysis.strengths.map((strength, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-300" />
+                    <span className="text-sm">{strength}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium text-indigo-100 mb-2">Areas to Improve</h4>
+              <div className="space-y-1">
+                {skillGapAnalysis.improvements.map((improvement, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <AlertCircle className="w-4 h-4 text-yellow-300" />
+                    <span className="text-sm">{improvement}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium text-indigo-100 mb-2">Next Level: {skillGapAnalysis.nextLevel}</h4>
+              <div className="space-y-1">
+                {skillGapAnalysis.recommendations.slice(0, 2).map((rec, index) => (
+                  <div key={index} className="text-sm text-indigo-100">• {rec}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Search and Filters */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-gray-200/50">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search skills..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="All">All Categories</option>
+            {skillCategories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="level">Sort by Level</option>
+            <option value="category">Sort by Category</option>
+            <option value="demand">Sort by Demand</option>
+          </select>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-indigo-100 text-indigo-600' : 'text-gray-400'}`}
+            >
+              <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
+                <div className="bg-current"></div>
+                <div className="bg-current"></div>
+                <div className="bg-current"></div>
+                <div className="bg-current"></div>
+              </div>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-indigo-100 text-indigo-600' : 'text-gray-400'}`}
+            >
+              <div className="w-4 h-4 space-y-1">
+                <div className="bg-current h-0.5"></div>
+                <div className="bg-current h-0.5"></div>
+                <div className="bg-current h-0.5"></div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50 hover:scale-105 transition-transform cursor-pointer">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">{skills.length}</span>
+          </div>
+          <h3 className="text-sm font-medium text-gray-600">Total Skills</h3>
+          <p className="text-xs text-gray-500 mt-1">Across {skillCategories.length} categories</p>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50 hover:scale-105 transition-transform cursor-pointer">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">
+              {Math.round(skills.reduce((acc, skill) => acc + skill.level, 0) / skills.length)}%
+            </span>
+          </div>
+          <h3 className="text-sm font-medium text-gray-600">Average Level</h3>
+          <p className="text-xs text-gray-500 mt-1">Overall proficiency</p>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50 hover:scale-105 transition-transform cursor-pointer">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+              <Award className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">
+              {skills.filter(skill => skill.level >= 80).length}
+            </span>
+          </div>
+          <h3 className="text-sm font-medium text-gray-600">Expert Skills</h3>
+          <p className="text-xs text-gray-500 mt-1">80% or higher</p>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50 hover:scale-105 transition-transform cursor-pointer">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+              <Target className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">
+              {Math.round(skills.reduce((acc, skill) => acc + skill.marketDemand, 0) / skills.length)}%
+            </span>
+          </div>
+          <h3 className="text-sm font-medium text-gray-600">Market Demand</h3>
+          <p className="text-xs text-gray-500 mt-1">Industry relevance</p>
+        </div>
+      </div>
+
+      {/* Learning Paths */}
+      {showRecommendations && learningPaths.length > 0 && (
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Recommended Learning Paths</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {learningPaths.map((path, index) => {
+              const Icon = path.icon
+              return (
+                <div key={index} className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors cursor-pointer">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">{path.title}</h4>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        path.difficulty === 'Advanced' ? 'bg-red-100 text-red-600' :
+                        path.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-green-100 text-green-600'
+                      }`}>
+                        {path.difficulty}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">{path.description}</p>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span className="flex items-center space-x-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{path.duration}</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <BookOpen className="w-3 h-3" />
+                      <span>{path.skills.length} skills</span>
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {path.skills.slice(0, 3).map((skill, i) => (
+                      <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        {skill}
+                      </span>
+                    ))}
+                    {path.skills.length > 3 && (
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        +{path.skills.length - 3}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Skills Display */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900">Skills Portfolio</h3>
+          <div className="text-sm text-gray-500">
+            {filteredAndSortedSkills.length} of {skills.length} skills
+          </div>
+        </div>
+        
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredAndSortedSkills.map((skill) => {
+              const CategoryIcon = categoryIcons[skill.category] || Code
+              return (
+                <div key={skill.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-200 hover:border-indigo-300">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        skill.category === 'Frontend' ? 'bg-blue-100' :
+                        skill.category === 'Backend' ? 'bg-green-100' :
+                        skill.category === 'Database' ? 'bg-purple-100' :
+                        skill.category === 'DevOps' ? 'bg-orange-100' :
+                        'bg-gray-100'
+                      }`}>
+                        <CategoryIcon className={`w-5 h-5 ${
+                          skill.category === 'Frontend' ? 'text-blue-600' :
+                          skill.category === 'Backend' ? 'text-green-600' :
+                          skill.category === 'Database' ? 'text-purple-600' :
+                          skill.category === 'DevOps' ? 'text-orange-600' :
+                          'text-gray-600'
+                        }`} />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">{skill.name}</h4>
+                        <p className="text-sm text-gray-500">{skill.category}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => setEditingSkill(skill)}
+                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                      >
+                        <Edit className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => removeSkill(skill.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full border ${getSkillLevelColor(skill.level)}`}>
+                        {getSkillLevelText(skill.level)}
+                      </span>
+                      <span className="text-xs text-gray-500">{skill.level}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${skill.level}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center space-x-1 text-gray-500">
+                      <Briefcase className="w-3 h-3" />
+                      <span>{skill.projects} projects</span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      <span>{skill.experience}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-3 h-3 text-yellow-500" />
+                      <span className={getDemandColor(skill.marketDemand)}>{skill.marketDemand}% demand</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <TrendingUp className="w-3 h-3 text-green-500" />
+                      <span className={getDemandColor(skill.growthPotential)}>{skill.growthPotential}% growth</span>
+                    </div>
+                  </div>
+                  
+                  {skill.certifications && skill.certifications.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {skill.certifications.slice(0, 2).map((cert, i) => (
+                        <span key={i} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          ✓ {cert}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredAndSortedSkills.map((skill) => {
+              const CategoryIcon = categoryIcons[skill.category] || Code
+              return (
+                <div key={skill.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-200 hover:border-indigo-300">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      skill.category === 'Frontend' ? 'bg-blue-100' :
+                      skill.category === 'Backend' ? 'bg-green-100' :
+                      skill.category === 'Database' ? 'bg-purple-100' :
+                      skill.category === 'DevOps' ? 'bg-orange-100' :
+                      'bg-gray-100'
+                    }`}>
+                      <CategoryIcon className={`w-5 h-5 ${
+                        skill.category === 'Frontend' ? 'text-blue-600' :
+                        skill.category === 'Backend' ? 'text-green-600' :
+                        skill.category === 'Database' ? 'text-purple-600' :
+                        skill.category === 'DevOps' ? 'text-orange-600' :
+                        'text-gray-600'
+                      }`} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h4 className="font-medium text-gray-900">{skill.name}</h4>
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full border ${getSkillLevelColor(skill.level)}`}>
+                          {getSkillLevelText(skill.level)}
+                        </span>
+                        <span className="text-xs text-gray-500">{skill.category}</span>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
+                        <span className="flex items-center space-x-1">
+                          <Briefcase className="w-3 h-3" />
+                          <span>{skill.projects} projects</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{skill.experience}</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <Star className="w-3 h-3 text-yellow-500" />
+                          <span className={getDemandColor(skill.marketDemand)}>{skill.marketDemand}% demand</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <TrendingUp className="w-3 h-3 text-green-500" />
+                          <span className={getDemandColor(skill.growthPotential)}>{skill.growthPotential}% growth</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-24">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${skill.level}%` }}
+                        />
+                      </div>
+                      <div className="text-center mt-1">
+                        <span className="text-xs font-medium text-gray-700">{skill.level}%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => setEditingSkill(skill)}
+                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => removeSkill(skill.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Enhanced Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Skills Bar Chart */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Skills Proficiency</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={filteredAndSortedSkills.slice(0, 8)}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="name" stroke="#9ca3af" angle={-45} textAnchor="end" height={80} />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip />
+              <Bar dataKey="level" fill="#6366f1" name="Proficiency %" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Skills Radar Chart */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Skills Overview</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <RadarChart data={radarData.slice(0, 8)}>
+              <PolarGrid stroke="#e5e7eb" />
+              <PolarAngleAxis dataKey="skill" stroke="#9ca3af" />
+              <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#9ca3af" />
+              <Radar name="Level" dataKey="level" stroke="#6366f1" fill="#6366f1" fillOpacity={0.6} />
+              <Tooltip />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Category Distribution */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Category Distribution</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={categoryData.filter(cat => cat.average > 0)}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={90}
+                paddingAngle={5}
+                dataKey="average"
+              >
+                {categoryData.filter(cat => cat.average > 0).map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#f97316'][index % 6]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="mt-4 space-y-2">
+            {categoryData.filter(cat => cat.average > 0).map((cat) => (
+              <div key={cat.category} className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">{cat.category}</span>
+                <span className="font-medium text-gray-900">{Math.round(cat.average)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Skill Trends */}
+      {skillTrends.length > 0 && (
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-gray-200/50">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Skill Growth Trends</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={skillTrends}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="month" stroke="#9ca3af" />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip />
+              <Legend />
+              <Area type="monotone" dataKey="frontend" stackId="1" stroke="#6366f1" fill="#6366f1" fillOpacity={0.6} />
+              <Area type="monotone" dataKey="backend" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} />
+              <Area type="monotone" dataKey="database" stackId="1" stroke="#ec4899" fill="#ec4899" fillOpacity={0.6} />
+              <Area type="monotone" dataKey="devops" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Enhanced Add Skill Modal */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Skill</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Skill Name</label>
+                <input
+                  type="text"
+                  value={newSkill.name}
+                  onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g., React, Python, SQL"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  value={newSkill.category}
+                  onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {skillCategories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+                <input
+                  type="text"
+                  value={newSkill.experience}
+                  onChange={(e) => setNewSkill({ ...newSkill, experience: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g., 2 years, 6 months"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Projects Count</label>
+                <input
+                  type="number"
+                  value={newSkill.projects}
+                  onChange={(e) => setNewSkill({ ...newSkill, projects: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Number of projects"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Proficiency Level: {newSkill.level}%</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={newSkill.level}
+                  onChange={(e) => setNewSkill({ ...newSkill, level: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+              </div>
+            </div>
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addSkill}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-200"
+              >
+                Add Skill
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Skill Modal */}
+      {editingSkill && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Skill</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Skill Name</label>
+                <input
+                  type="text"
+                  value={editingSkill.name}
+                  onChange={(e) => setEditingSkill({ ...editingSkill, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  value={editingSkill.category}
+                  onChange={(e) => setEditingSkill({ ...editingSkill, category: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {skillCategories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+                <input
+                  type="text"
+                  value={editingSkill.experience}
+                  onChange={(e) => setEditingSkill({ ...editingSkill, experience: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Projects Count</label>
+                <input
+                  type="number"
+                  value={editingSkill.projects}
+                  onChange={(e) => setEditingSkill({ ...editingSkill, projects: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Proficiency Level: {editingSkill.level}%</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={editingSkill.level}
+                  onChange={(e) => setEditingSkill({ ...editingSkill, level: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+              </div>
+            </div>
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => setEditingSkill(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => updateSkill(editingSkill.id, editingSkill)}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-200"
+              >
+                Update Skill
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default SkillAnalyzer
