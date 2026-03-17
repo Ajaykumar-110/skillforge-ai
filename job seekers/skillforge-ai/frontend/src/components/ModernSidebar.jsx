@@ -32,22 +32,10 @@ import {
   MessageSquare
 } from 'lucide-react';
 
-// Mock user data for display
-const mockUser = {
-  full_name: 'Software Architect',
-  target_job_role: 'Software Architect'
-};
-
-// Career progress (mock data)
-const careerProgress = 65;
-const jobMatchesCount = 12;
-const skillsCompleted = 8;
-
 const ModernSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
-  const [userProfile, setUserProfile] = useState(mockUser);
 
   const handleLogout = () => {
     // Clear localStorage
@@ -422,73 +410,6 @@ const ModernSidebar = () => {
               </motion.button>
             </div>
           </div>
-
-          {/* User Profile Card */}
-          {userProfile && !isCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-6 border-b border-gray-200/50 dark:border-gray-800/50"
-            >
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => window.location.href = '/dashboard'}
-                className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl p-4 border border-purple-200/50 dark:border-purple-800/50 cursor-pointer hover:shadow-lg transition-all duration-200"
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 dark:text-white truncate">
-                      {userProfile.full_name || 'User'}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      {userProfile.target_job_role || 'Professional'}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </div>
-                
-                {/* Career Progress */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600 dark:text-gray-400">Career Progress</span>
-                    <span className="font-medium text-purple-600 dark:text-purple-400">{careerProgress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${careerProgress}%` }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
-                    />
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex space-x-2 mt-3">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => window.location.href = '/dashboard'}
-                    className="flex-1 px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
-                  >
-                    Dashboard
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => window.location.href = '/profile'}
-                    className="flex-1 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200"
-                  >
-                    View Profile
-                  </motion.button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-6 space-y-6">
