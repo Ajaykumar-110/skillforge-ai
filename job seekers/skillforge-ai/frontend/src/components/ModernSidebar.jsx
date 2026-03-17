@@ -125,6 +125,13 @@ const ModernSidebar = () => {
           badge: 'AI'
         },
         {
+          path: '/ai-assistant',
+          label: 'AI Assistant',
+          icon: MessageSquare,
+          description: 'Career Guidance Chat',
+          badge: 'AI'
+        },
+        {
           path: '/course-recommendations',
           label: 'Course Recommendation',
           icon: BookOpen,

@@ -21,6 +21,7 @@ import SkillAnalyzer from './pages/SkillAnalyzer';
 import SkillsAndRolesBrowser from './components/SkillsAndRolesBrowser';
 import JobSearch from './pages/JobSearch';
 import CareerRoadmap from './pages/CareerRoadmap';
+import AIAssistantPage from './pages/AIAssistantPage';
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
             
             {/* AI Routes */}
             <Route path="/chatbot" element={<CareerRoadmap />} />
+            <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/career-roadmap" element={<CareerRoadmapGenerator />} />
             
             {/* Fallback */}

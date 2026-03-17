@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import AIAssistant from '../components/AIAssistant';
 
 const Dashboard = () => {
   const { darkMode } = useTheme();
@@ -650,6 +651,15 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
+          </motion.div>
+
+          {/* AI Assistant */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <AIAssistant />
           </motion.div>
 
           {/* Trending Skills */}
