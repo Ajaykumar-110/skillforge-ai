@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import ModernSidebar from './components/ModernSidebar';
 import DynamicDashboard from './components/DynamicDashboard';
@@ -26,50 +28,157 @@ import AIAssistantPage from './pages/AIAssistantPage';
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <Layout>
+      <AuthProvider>
+        <Router>
           <Routes>
-            {/* Main Routes */}
-            <Route path="/" element={<Navigate to="/register" replace />} />
-            <Route path="/dashboard" element={<DynamicDashboard />} />
-            <Route path="/profile" element={<UserProfile />} />
-            
-            {/* Auth Routes */}
-            <Route path="/register" element={<EnhancedRegister />} />
+            {/* Public Auth Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<EnhancedRegister />} />
             
-            {/* Resume Routes */}
-            <Route path="/resume-upload" element={<ResumeUploadEnhanced />} />
+            {/* Protected Routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Navigate to="/dashboard" replace />
+              </ProtectedRoute>
+            } />
             
-            {/* Skill Routes */}
-            <Route path="/skill-analyzer" element={<SkillAnalyzer />} />
-            <Route path="/skills-roles" element={<SkillsAndRolesBrowser />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Layout>
+                  <DynamicDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
             
-            {/* Job Routes */}
-            <Route path="/job-recommendations" element={<JobRecommendationsReal />} />
-            <Route path="/job-search" element={<RealJobSearch />} />
-            <Route path="/real-job-search" element={<JobSearch />} />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Layout>
+                  <UserProfile />
+                </Layout>
+              </ProtectedRoute>
+            } />
             
-            {/* Learning Routes */}
-            <Route path="/github-projects" element={<GitHubProjectsUpgraded />} />
-            <Route path="/course-recommendations" element={<CourseRecommendationsReal />} />
+            <Route path="/resume-upload" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ResumeUploadEnhanced />
+                </Layout>
+              </ProtectedRoute>
+            } />
             
-            {/* Market & Interview Routes */}
-            <Route path="/job-market" element={<JobMarketInsightsEnhanced />} />
-            <Route path="/job-market-insights" element={<JobMarketInsightsEnhanced />} />
-            <Route path="/voice-interview" element={<VoiceInterview />} />
-            <Route path="/ai-mock-interview" element={<AIMockInterview />} />
+            <Route path="/skill-analyzer" element={
+              <ProtectedRoute>
+                <Layout>
+                  <SkillAnalyzer />
+                </Layout>
+              </ProtectedRoute>
+            } />
             
-            {/* AI Routes */}
-            <Route path="/chatbot" element={<CareerRoadmap />} />
-            <Route path="/ai-assistant" element={<AIAssistantPage />} />
-            <Route path="/career-roadmap" element={<CareerRoadmapGenerator />} />
+            <Route path="/career-roadmap" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CareerRoadmapGenerator />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/course-recommendations" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CourseRecommendationsReal />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/github-projects" element={
+              <ProtectedRoute>
+                <Layout>
+                  <GitHubProjectsUpgraded />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/job-search" element={
+              <ProtectedRoute>
+                <Layout>
+                  <RealJobSearch />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/real-job-search" element={
+              <ProtectedRoute>
+                <Layout>
+                  <JobSearch />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/job-recommendations" element={
+              <ProtectedRoute>
+                <Layout>
+                  <JobRecommendationsReal />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/job-market" element={
+              <ProtectedRoute>
+                <Layout>
+                  <JobMarketInsightsEnhanced />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/job-market-insights" element={
+              <ProtectedRoute>
+                <Layout>
+                  <JobMarketInsightsEnhanced />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/voice-interview" element={
+              <ProtectedRoute>
+                <Layout>
+                  <VoiceInterview />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/ai-mock-interview" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AIMockInterview />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/ai-assistant" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AIAssistantPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/chatbot" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CareerRoadmap />
+                </Layout>
+              </ProtectedRoute>
+            } />
             
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={
+              <ProtectedRoute>
+                <Navigate to="/dashboard" replace />
+              </ProtectedRoute>
+            } />
           </Routes>
-        </Layout>
-      </Router>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

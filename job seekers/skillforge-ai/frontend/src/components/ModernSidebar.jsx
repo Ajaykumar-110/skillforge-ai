@@ -45,92 +45,120 @@ const ModernSidebar = () => {
     {
       id: 'main',
       title: 'MAIN',
+      color: '#3b82f6',
+      iconColor: 'text-blue-500',
+      hoverColor: 'hover:bg-blue-50 dark:hover:bg-blue-900/20',
       items: [
         {
           path: '/dashboard',
           label: 'Dashboard',
           icon: LayoutDashboard,
+          iconColor: 'text-blue-500'
         }
       ]
     },
     {
       id: 'user',
       title: 'USER',
+      color: '#10b981',
+      iconColor: 'text-green-500',
+      hoverColor: 'hover:bg-green-50 dark:hover:bg-green-900/20',
       items: [
         {
           path: '/profile',
           label: 'Profile',
           icon: User,
+          iconColor: 'text-green-500'
         },
         {
           path: '/resume-upload',
           label: 'Resume Upload & Analyzer',
           icon: Upload,
+          iconColor: 'text-green-500'
         }
       ]
     },
     {
       id: 'ai-analysis',
       title: 'AI ANALYSIS',
+      color: '#8b5cf6',
+      iconColor: 'text-purple-500',
+      hoverColor: 'hover:bg-purple-50 dark:hover:bg-purple-900/20',
       items: [
         {
           path: '/skill-analyzer',
           label: 'Skill Analyzer',
           icon: Brain,
+          iconColor: 'text-purple-500'
         },
         {
           path: '/career-roadmap',
           label: 'AI Career Roadmap',
           icon: Target,
+          iconColor: 'text-purple-500'
         }
       ]
     },
     {
       id: 'learning',
       title: 'LEARNING',
+      color: '#f97316',
+      iconColor: 'text-orange-500',
+      hoverColor: 'hover:bg-orange-50 dark:hover:bg-orange-900/20',
       items: [
         {
           path: '/course-recommendations',
           label: 'Course Recommendation',
           icon: BookOpen,
+          iconColor: 'text-orange-500'
         },
         {
           path: '/github-projects',
           label: 'GitHub Project Recommendations',
           icon: Github,
+          iconColor: 'text-orange-500'
         }
       ]
     },
     {
       id: 'jobs',
       title: 'JOBS',
+      color: '#ef4444',
+      iconColor: 'text-red-500',
+      hoverColor: 'hover:bg-red-50 dark:hover:bg-red-900/20',
       items: [
         {
           path: '/job-search',
           label: 'Job Search',
           icon: Search,
+          iconColor: 'text-red-500'
         },
         {
           path: '/job-recommendations',
           label: 'Job Recommendation',
           icon: Briefcase,
+          iconColor: 'text-red-500'
         }
       ]
     },
     {
       id: 'ai-assistant',
       title: 'AI ASSISTANT',
+      color: '#ec4899',
+      iconColor: 'text-pink-500',
+      hoverColor: 'hover:bg-pink-50 dark:hover:bg-pink-900/20',
       items: [
         {
           path: '/ai-assistant',
           label: 'AI Career Chatbot',
           icon: MessageSquare,
+          iconColor: 'text-pink-500'
         }
       ]
     }
   ];
 
-  const MenuItem = ({ icon: Icon, label, path, isSubItem = false }) => {
+  const MenuItem = ({ icon: Icon, label, path, isSubItem = false, iconColor, hoverColor, sectionColor }) => {
     const isActive = location.pathname === path;
     
     return (
@@ -139,14 +167,14 @@ const ModernSidebar = () => {
         onClick={closeMobileSidebar}
         className={`group flex items-center ${isSubItem ? 'pl-4' : 'pl-3'} pr-3 py-2.5 rounded-lg transition-all duration-200 ${
           isActive
-            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
-            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm transform scale-105'
+            : `text-gray-700 dark:text-gray-300 ${hoverColor} transform -translate-x-1 hover:translate-x-0`
         } ${isCollapsed ? 'justify-center' : ''}`}
       >
         <Icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${
           isCollapsed ? '' : 'mr-3'
         } ${
-          isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+          isActive ? 'text-white' : iconColor
         }`} />
         
         {!isCollapsed && (
@@ -165,9 +193,10 @@ const ModernSidebar = () => {
       <div className="space-y-1">
         <button
           onClick={() => toggleSection(section.id)}
-          className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300 transition-colors ${
+          className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
             isCollapsed ? 'justify-center' : ''
           }`}
+          style={{ color: section.color }}
         >
           {!isCollapsed && <span>{section.title}</span>}
           {!isCollapsed && (
@@ -175,7 +204,7 @@ const ModernSidebar = () => {
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-4 h-4" style={{ color: section.color }} />
             </motion.div>
           )}
         </button>
@@ -196,6 +225,9 @@ const ModernSidebar = () => {
                   label={item.label}
                   path={item.path}
                   isSubItem={true}
+                  iconColor={item.iconColor}
+                  hoverColor={section.hoverColor}
+                  sectionColor={section.color}
                 />
               ))}
             </motion.div>
@@ -227,26 +259,29 @@ const ModernSidebar = () => {
           width: isCollapsed ? 80 : 280,
           transition: { duration: 0.3, ease: 'easeInOut' }
         }}
-        className={`fixed left-0 top-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-50 flex flex-col ${
+        className={`fixed left-0 top-0 h-screen z-50 flex flex-col ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } transition-transform duration-300 ease-in-out`}
+        style={{
+          background: 'linear-gradient(180deg, #f8f9ff, #eef1ff)'
+        }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
           {!isCollapsed && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center space-x-3"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
                 <Brain className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h1 className="text-lg font-bold text-gray-900">
                   SkillForge AI
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-600">
                   Career Platform
                 </p>
               </div>
@@ -257,17 +292,17 @@ const ModernSidebar = () => {
             {/* Desktop Toggle */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="hidden lg:flex p-2 rounded-lg hover:bg-white/70 transition-colors"
             >
-              <Menu className="w-4 h-4 text-gray-500" />
+              <Menu className="w-4 h-4 text-gray-600" />
             </button>
             
             {/* Mobile Close */}
             <button
               onClick={closeMobileSidebar}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/70 transition-colors"
             >
-              <X className="w-4 h-4 text-gray-500" />
+              <X className="w-4 h-4 text-gray-600" />
             </button>
           </div>
         </div>
@@ -280,13 +315,13 @@ const ModernSidebar = () => {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+        <div className="p-4 border-t border-gray-200/50 bg-white/50 backdrop-blur-sm space-y-3">
           {/* Logout Button */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleLogout}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-3 py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200`}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200`}
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
             {!isCollapsed && (
@@ -297,10 +332,13 @@ const ModernSidebar = () => {
           {/* Version Info */}
           {!isCollapsed && (
             <div className="text-center">
-              <p className="text-xs font-medium text-gray-900 dark:text-white">
+              <p className="text-xs font-semibold text-gray-900">
                 SkillForge AI
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-600">
+                AI Career Development Platform
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
                 Version 2.0
               </p>
             </div>
