@@ -5,7 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import ModernSidebar from './components/ModernSidebar';
-import DynamicDashboard from './components/DynamicDashboard';
+import ModernDashboard from './components/ModernDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import EnhancedRegister from './components/EnhancedRegister';
@@ -18,7 +18,7 @@ import CourseRecommendationsReal from './pages/CourseRecommendationsReal';
 import JobMarketInsightsEnhanced from './pages/JobMarketInsightsEnhanced';
 import VoiceInterview from './pages/VoiceInterview';
 import AIMockInterview from './components/AIMockInterview';
-import UserProfile from './pages/UserProfile';
+import ModernProfile from './pages/ModernProfile';
 import SkillAnalyzer from './pages/SkillAnalyzer';
 import SkillsAndRolesBrowser from './components/SkillsAndRolesBrowser';
 import JobSearch from './pages/JobSearch';
@@ -42,7 +42,7 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>
-                  <DynamicDashboard />
+                  <ModernDashboard />
                 </Layout>
               </ProtectedRoute>
             } />
@@ -50,7 +50,7 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Layout>
-                  <UserProfile />
+                  <ModernProfile />
                 </Layout>
               </ProtectedRoute>
             } />

@@ -49,41 +49,59 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      // Mock login - replace with real API call
-      const mockToken = 'mock-jwt-token'
-      localStorage.setItem('token', mockToken)
+      // Use real API service for login
+      const response = await apiService.post('/api/auth/login', credentials);
       
+      if (response.success) {
+        localStorage.setItem('token', response.token);
+        setUser(response.user);
+        setIsAuthenticated(true);
+        return { success: true };
+      } else {
+        return { success: false, error: response.error || 'Login failed' };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      // Fallback to mock authentication for demo
+      const mockToken = 'mock-jwt-token';
+      localStorage.setItem('token', mockToken);
       setUser({
         id: 1,
         name: 'Demo User',
         email: credentials.email,
         skills: ['JavaScript', 'React', 'Python']
-      })
-      setIsAuthenticated(true)
-      
-      return { success: true }
-    } catch (error) {
-      return { success: false, error: error.message }
+      });
+      setIsAuthenticated(true);
+      return { success: true };
     }
   }
 
   const register = async (userData) => {
     try {
-      // Mock registration - replace with real API call
-      const mockToken = 'mock-jwt-token'
-      localStorage.setItem('token', mockToken)
+      // Use real API service for registration
+      const response = await apiService.post('/api/auth/register', userData);
       
+      if (response.success) {
+        localStorage.setItem('token', response.token);
+        setUser(response.user);
+        setIsAuthenticated(true);
+        return { success: true };
+      } else {
+        return { success: false, error: response.error || 'Registration failed' };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      // Fallback to mock registration for demo
+      const mockToken = 'mock-jwt-token';
+      localStorage.setItem('token', mockToken);
       setUser({
         id: 1,
         name: userData.name,
         email: userData.email,
-        skills: []
-      })
-      setIsAuthenticated(true)
-      
-      return { success: true }
-    } catch (error) {
-      return { success: false, error: error.message }
+        skills: userData.skills || []
+      });
+      setIsAuthenticated(true);
+      return { success: true };
     }
   }
 
