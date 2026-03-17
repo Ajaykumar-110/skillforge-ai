@@ -3,9 +3,11 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Briefcase, Sparkles, ArrowRight, AlertCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
   const { darkMode } = useTheme();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -44,72 +46,16 @@ const Login = () => {
     setLoginError('');
     
     try {
-      // Try real API first
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      // Use AuthContext login function
+      const result = await login(formData);
       
-      const data = await response.json();
-      
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+      if (result.success) {
         navigate('/dashboard');
       } else {
-        setLoginError(data.message || 'Login failed. Please try again.');
+        setLoginError(result.error || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
-      console.log('Network error, using direct mock authentication...');
-      
-      // Direct fallback authentication (more reliable)
-      try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check if user is registered
-        const registeredUser = localStorage.getItem('registeredUser');
-        let mockUser;
-        
-        if (registeredUser) {
-          const parsedUser = JSON.parse(registeredUser);
-          // Validate against registered user credentials
-          if (parsedUser.email === formData.email && parsedUser.password === formData.password) {
-            mockUser = {
-              id: parsedUser.id,
-              full_name: parsedUser.full_name,
-              email: parsedUser.email,
-              skills: parsedUser.skills,
-              target_job_role: parsedUser.target_job_role
-            };
-          }
-        }
-        
-        // If no registered user found or credentials don't match, create mock user
-        if (!mockUser) {
-          if (formData.email && formData.password && formData.password.length >= 6) {
-            mockUser = {
-              id: Date.now(),
-              full_name: formData.email.split('@')[0],
-              email: formData.email,
-              skills: ['JavaScript', 'React', 'Node.js'],
-              target_job_role: 'Full Stack Developer'
-            };
-          } else {
-            setLoginError('Please enter a valid email and password (min 6 characters)');
-            return;
-          }
-        }
-        
-        localStorage.setItem('token', 'mock-token-' + Date.now());
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        navigate('/dashboard');
-      } catch (mockError) {
-        setLoginError('Authentication failed. Please try again.');
-      }
+      setLoginError('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

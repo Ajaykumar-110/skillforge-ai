@@ -22,10 +22,8 @@ export const AuthProvider = ({ children }) => {
       // Verify token with backend
       verifyToken(token)
     } else {
-      // For demo purposes, set a mock token if none exists
-      const mockToken = 'mock-jwt-token'
-      localStorage.setItem('mockToken', mockToken)
-      verifyToken(mockToken)
+      // No token found, user is not authenticated
+      setLoading(false)
     }
   }, [])
 

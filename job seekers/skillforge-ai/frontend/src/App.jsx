@@ -35,13 +35,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<EnhancedRegister />} />
             
-            {/* Protected Routes */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Navigate to="/dashboard" replace />
-              </ProtectedRoute>
-            } />
+            {/* Default Route - Redirect to register */}
+            <Route path="/" element={<Navigate to="/register" replace />} />
             
+            {/* Protected Routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>

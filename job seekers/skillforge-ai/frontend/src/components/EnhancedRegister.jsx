@@ -18,9 +18,11 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const EnhancedRegister = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -203,39 +205,28 @@ const EnhancedRegister = () => {
     setErrors({});
 
     try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      submitData.append('fullName', formData.fullName);
-      submitData.append('email', formData.email);
-      submitData.append('password', formData.password);
-      submitData.append('skills', JSON.stringify(formData.skills));
-      submitData.append('targetRole', formData.targetRole);
-      submitData.append('experienceLevel', formData.experienceLevel);
-      if (formData.resume) {
-        submitData.append('resume', formData.resume);
-      }
-
-      // Mock API call (replace with real backend)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Store user data in localStorage for demo
+      // Prepare user data for registration
       const userData = {
-        id: Date.now(),
-        fullName: formData.fullName,
+        name: formData.fullName,
         email: formData.email,
+        password: formData.password,
         skills: formData.skills,
         targetJobRole: formData.targetRole,
         experienceLevel: formData.experienceLevel,
         resumeAnalysis: resumeAnalysis
       };
       
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', 'mock-token-' + Date.now());
+      // Use AuthContext register function
+      const result = await register(userData);
       
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
+      if (result.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      } else {
+        setErrors(prev => ({ ...prev, submit: result.error || 'Registration failed. Please try again.' }));
+      }
       
     } catch (error) {
       setErrors(prev => ({ ...prev, submit: 'Registration failed. Please try again.' }));
