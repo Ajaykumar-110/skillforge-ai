@@ -4,9 +4,8 @@ import uuid
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from sqlalchemy import text
 
-from db import ensure_schema, get_engine, is_mysql_configured
+from db import ensure_schema, get_conn, is_postgres_configured
 
 
 load_dotenv()
@@ -15,10 +14,10 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-def _get_engine_or_none():
-    if not is_mysql_configured():
+def _get_conn_or_none():
+    if not is_postgres_configured():
         return None
-    return get_engine()
+    return get_conn()
 
 
 @app.get("/api/health")
@@ -26,23 +25,25 @@ def health():
     return jsonify(
         {
             "ok": True,
-            "mysqlConfigured": is_mysql_configured(),
+            "postgresConfigured": is_postgres_configured(),
         }
     )
 
 
 @app.get("/api/db/health")
 def db_health():
-    engine = _get_engine_or_none()
-    if engine is None:
-        return jsonify({"ok": False, "error": "MySQL not configured"}), 500
+    conn = _get_conn_or_none()
+    if conn is None:
+        return jsonify({"ok": False, "error": "Postgres not configured"}), 500
 
-    ensure_schema(engine)
-
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-
-    return jsonify({"ok": True})
+    try:
+        ensure_schema(conn)
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            cur.fetchone()
+        return jsonify({"ok": True})
+    finally:
+        conn.close()
 
 
 @app.post("/api/user/token")
@@ -58,26 +59,29 @@ def get_profile():
     if not user_id:
         return jsonify({"error": "userId is required"}), 400
 
-    engine = _get_engine_or_none()
-    if engine is None:
-        return jsonify({"error": "MySQL not configured"}), 500
+    conn = _get_conn_or_none()
+    if conn is None:
+        return jsonify({"error": "Postgres not configured"}), 500
 
-    ensure_schema(engine)
-
-    with engine.connect() as conn:
-        result = conn.execute(
-            text(
+    try:
+        ensure_schema(conn)
+        with conn.cursor() as cur:
+            cur.execute(
                 """
                 SELECT user_id, name, email, title, location, about, skills, created_at, updated_at
                 FROM user_profiles
-                WHERE user_id = :user_id
+                WHERE user_id = %s
                 LIMIT 1
-                """
-            ),
-            {"user_id": user_id},
-        ).mappings().first()
-
-    return jsonify({"profile": dict(result) if result else None})
+                """,
+                (user_id,),
+            )
+            row = cur.fetchone()
+        if not row:
+            return jsonify({"profile": None})
+        keys = ["user_id", "name", "email", "title", "location", "about", "skills", "created_at", "updated_at"]
+        return jsonify({"profile": dict(zip(keys, row))})
+    finally:
+        conn.close()
 
 
 @app.post("/api/user/profile")
@@ -88,11 +92,9 @@ def upsert_profile():
     if not user_id or not name:
         return jsonify({"error": "userId and name are required"}), 400
 
-    engine = _get_engine_or_none()
-    if engine is None:
-        return jsonify({"error": "MySQL not configured"}), 500
-
-    ensure_schema(engine)
+    conn = _get_conn_or_none()
+    if conn is None:
+        return jsonify({"error": "Postgres not configured"}), 500
 
     email = (payload.get("email") or None)
     title = (payload.get("title") or None)
@@ -100,32 +102,27 @@ def upsert_profile():
     about = (payload.get("about") or None)
     skills = payload.get("skills")
 
-    with engine.begin() as conn:
-        conn.execute(
-            text(
+    try:
+        ensure_schema(conn)
+        with conn.cursor() as cur:
+            cur.execute(
                 """
                 INSERT INTO user_profiles (user_id, name, email, title, location, about, skills)
-                VALUES (:user_id, :name, :email, :title, :location, :about, :skills)
-                ON DUPLICATE KEY UPDATE
-                  name = VALUES(name),
-                  email = VALUES(email),
-                  title = VALUES(title),
-                  location = VALUES(location),
-                  about = VALUES(about),
-                  skills = VALUES(skills),
-                  updated_at = CURRENT_TIMESTAMP
-                """
-            ),
-            {
-                "user_id": user_id,
-                "name": name,
-                "email": email,
-                "title": title,
-                "location": location,
-                "about": about,
-                "skills": skills,
-            },
-        )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (user_id) DO UPDATE SET
+                  name = EXCLUDED.name,
+                  email = EXCLUDED.email,
+                  title = EXCLUDED.title,
+                  location = EXCLUDED.location,
+                  about = EXCLUDED.about,
+                  skills = EXCLUDED.skills,
+                  updated_at = NOW()
+                """,
+                (user_id, name, email, title, location, about, psycopg.types.json.Json(skills) if skills is not None else None),
+            )
+        conn.commit()
+    finally:
+        conn.close()
 
     return jsonify({"ok": True})
 
